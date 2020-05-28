@@ -11,6 +11,7 @@ import (
 )
 
 var port = ":80"
+var retry_ms = "120"
 
 type Message struct {
 	Content string
@@ -20,6 +21,10 @@ func main() {
 	// env overriding port
 	if os.Getenv("SERVER_PORT") != "" {
 		port = os.Getenv("SERVER_PORT")
+	}
+	
+	if os.Getenv("RETRY_MS") != "" {
+		retry_ms = os.Getenv("RETRY_MS")
 	}
 
 	// ensure we have an index.html file
@@ -56,6 +61,7 @@ func main() {
 		// Override status to 503 and serve index
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Retry-After", retry_ms)
 		w.WriteHeader(http.StatusServiceUnavailable)
 
 		_, err := w.Write(index)
